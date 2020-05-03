@@ -1,0 +1,42 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: nginx
+spec:
+  ports:
+  - port: 80
+    name: web
+    protocol: TCP
+  selector:
+    app: nginx
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: covid-web
+spec:
+  entryPoints:
+    - web
+  routes:
+  - kind: Rule
+    match: Host(`covid.mignon.chat`) && PathPrefix(`/`)
+    services:
+    - name: nginx
+      port: 80
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: covid-web-tls
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - kind: Rule
+    match: Host(`covid.mignon.chat`) && PathPrefix(`/`)
+    services:
+    - name: nginx
+      port: 80
+  tls:
+    certResolver: le
+
